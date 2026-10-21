@@ -8,6 +8,7 @@ const { sequelize } = require('./src/config/database');
 require('./src/models/Usuario');
 require('./src/models/Caso');
 require('./src/models/Parte');
+require('./src/models/Evidencia');
 const casoRoutes = require('./src/routes/casoRoutes');
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
 const authRoutes = require('./src/routes/authRoutes');
