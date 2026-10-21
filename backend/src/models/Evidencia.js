@@ -18,8 +18,14 @@ const Evidencia = sequelize.define('Evidencia', {
   },
   hash_md5: {
     type: DataTypes.STRING(32),
-    allowNull: true // Ideal para validar la integridad del archivo forense
+    allowNull: true
   },
+  // --- AGREGAMOS EL ESTÁNDAR SHA-256 ---
+  hash_sha256: {
+    type: DataTypes.STRING(64),
+    allowNull: true
+  },
+  // ------------------------------------
   caso_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -32,7 +38,6 @@ const Evidencia = sequelize.define('Evidencia', {
   updatedAt: false
 });
 
-// Relación: Un Caso tiene muchas Evidencias
 Caso.hasMany(Evidencia, { foreignKey: 'caso_id' });
 Evidencia.belongsTo(Caso, { foreignKey: 'caso_id' });
 

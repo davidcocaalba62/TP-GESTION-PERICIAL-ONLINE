@@ -1,10 +1,12 @@
 const express = require('express');
-const router = express.Router({ mergeParams: true }); // Para poder leer el ID del caso de la URL
+const router = express.Router({ mergeParams: true });
 const evidenciaController = require('../controllers/EvidenciaController');
-const upload = require('../middlewares/uploadMiddleware'); // Importamos a nuestro guardia de archivos
+const upload = require('../middlewares/uploadMiddleware');
 
-// La ruta usa el middleware "upload.single('archivo')" para interceptar y guardar el archivo 
-// antes de pasarle los datos al controlador. 'archivo' es el nombre del campo que usaremos.
+// Ruta para subir evidencia (ya la tenías)
 router.post('/', upload.single('archivo'), evidenciaController.subirEvidencia);
+
+// NUEVA RUTA: Para descargar una evidencia específica (ej: /api/casos/2/evidencias/1/descargar)
+router.get('/:evidenciaId/descargar', evidenciaController.descargarEvidencia);
 
 module.exports = router;
