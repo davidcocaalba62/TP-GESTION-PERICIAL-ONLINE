@@ -1,0 +1,15 @@
+# Dependencias de Node
+node_modules/
+
+# Variables de entorno y secretos (¡CRÍTICO!)
+.env
+
+# Archivos de la base de datos de Docker
+db_data/
+
+# Archivos subidos por los usuarios (evidencias)
+backend/src/uploads/
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
