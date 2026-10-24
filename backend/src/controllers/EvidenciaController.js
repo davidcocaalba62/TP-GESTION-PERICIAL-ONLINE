@@ -31,11 +31,13 @@ const subirEvidencia = async (req, res) => {
 
         // Guardamos en la base de datos
         const nuevaEvidencia = await Evidencia.create({
+            descripcion: req.body.descripcion || 'Evidencia sin descripción',
             nombre_archivo: req.file.originalname,
             ruta_archivo: req.file.filename,
             hash_md5: calcMd5,
-            hash_sha256: calcSha256, // Guardamos el nuevo hash
-            caso_id: casoId
+            hash_sha256: calcSha256,
+            caso_id: casoId,
+            perito_id: req.usuario.id // Registra automáticamente al perito autenticado
         });
 
         res.status(201).json({

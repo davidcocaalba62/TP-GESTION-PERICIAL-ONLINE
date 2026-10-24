@@ -13,7 +13,9 @@ const listarCasos = async (req, res) => {
 // Función para crear un nuevo caso (expediente)
 const crearCaso = async (req, res) => {
     try {
-        const nuevoCaso = await Caso.create(req.body);
+        // Combinamos los datos del formulario con el ID del perito validado por el token
+        const casoData = { ...req.body, usuario_id: req.usuario.id };
+        const nuevoCaso = await Caso.create(casoData);
         res.status(201).json(nuevoCaso);
     } catch (error) {
         res.status(400).json({ error: 'Error al registrar el expediente', detalle: error.message });
