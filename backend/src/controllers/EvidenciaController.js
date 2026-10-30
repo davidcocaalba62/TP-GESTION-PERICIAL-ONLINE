@@ -60,19 +60,50 @@ const descargarEvidencia = async (req, res) => {
         const evidencia = await Evidencia.findByPk(evidenciaId);
         
         if (!evidencia) {
+            console.log("❌ Descarga fallida: ID de evidencia no existe en la BD.");
             return res.status(404).json({ error: 'Evidencia no encontrada' });
         }
 
-        const rutaCompleta = path.join(__dirname, '../../uploads', evidencia.ruta_archivo);
+        // 1. Probamos buscar en la carpeta uploads raíz
+        const rutaPrincipal = path.join(__dirname, '../uploads', evidencia.ruta_archivo);
         
-        if (!fs.existsSync(rutaCompleta)) {
-            return res.status(404).json({ error: 'El archivo físico no se encuentra en el servidor' });
+        // 2. Probamos buscar en la subcarpeta (por si multer lo está guardando ahí)
+        const rutaAlternativa = path.join(__dirname, '../../uploads/evidencias', evidencia.ruta_archivo);
+        
+        console.log("🔍 Intentando descargar archivo...");
+        console.log("-> Buscando en:", rutaPrincipal);
+
+        if (fs.existsSync(rutaPrincipal)) {
+            console.log("✅ ¡Archivo encontrado en ruta principal! Descargando...");
+            return res.download(rutaPrincipal, evidencia.nombre_archivo);
+        } 
+        
+        console.log("-> Buscando en:", rutaAlternativa);
+        
+        if (fs.existsSync(rutaAlternativa)) {
+            console.log("✅ ¡Archivo encontrado en ruta alternativa! Descargando...");
+            return res.download(rutaAlternativa, evidencia.nombre_archivo);
         }
 
-        res.download(rutaCompleta, evidencia.nombre_archivo);
+        // Si no está en ninguna de las dos carpetas, mandamos el 404
+        console.log("❌ ERROR 404: El archivo físico desapareció o la ruta de Multer es distinta.");
+        return res.status(404).json({ error: 'El archivo físico no se encuentra en el servidor' });
+
     } catch (error) {
+        console.error("Error al descargar:", error);
         res.status(500).json({ error: 'Error al descargar', detalle: error.message });
     }
 };
 
-module.exports = { subirEvidencia, descargarEvidencia };
+const listarEvidencias = async (req, res) => {
+    try {
+        const casoId = req.params.casoId;
+        const evidencias = await Evidencia.findAll({ where: { caso_id: casoId } });
+        res.json(evidencias);
+    } catch (error) {
+        console.error("Error al listar evidencias:", error);
+        res.status(500).json({ error: 'Error al obtener las evidencias' });
+    }
+};
+
+module.exports = { subirEvidencia, descargarEvidencia, listarEvidencias };

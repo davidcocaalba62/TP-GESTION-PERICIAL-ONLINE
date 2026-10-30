@@ -1,23 +1,43 @@
 const Caso = require('../models/Caso');
 
-// Función para obtener todos los casos (expedientes)
 const listarCasos = async (req, res) => {
     try {
         const casos = await Caso.findAll();
-        res.status(200).json(casos);
+        res.json(casos);
     } catch (error) {
+        console.error("Error al listar casos:", error);
         res.status(500).json({ error: 'Error al obtener los expedientes' });
     }
 };
 
-// Función para crear un nuevo caso (expediente)
 const crearCaso = async (req, res) => {
     try {
-        // Combinamos los datos del formulario con el ID del perito validado por el token
-        const casoData = { ...req.body, usuario_id: req.usuario.id };
+        // Imprimimos en la consola del backend para salir de dudas definitivamente
+        console.log("Payload completo del token en req.usuario:", req.usuario);
+
+        // Buscamos el ID en todas las variantes posibles (id, userId, sub, usuarioId)
+        const peritoId = req.usuario?.id || req.usuario?.userId || req.usuario?.sub || req.usuario?.usuarioId;
+
+        if (!peritoId) {
+            return res.status(400).json({ 
+                error: 'Error de autenticación', 
+                detalle: 'El token de acceso no contiene un identificador de usuario válido. Por favor, volvé a iniciar sesión.' 
+            });
+        }
+
+        const casoData = {
+            numero_expediente: req.body.numero_expediente,
+            tipo_peritaje: req.body.tipo_peritaje,
+            estado: req.body.estado || 'Recibido',
+            fecha_recepcion: req.body.fecha_recepcion || new Date().toISOString().split('T')[0],
+            fecha_vencimiento: req.body.fecha_vencimiento || null,
+            perito_senior_id: peritoId // Asignación segura del ID del perito autenticado
+        };
+
         const nuevoCaso = await Caso.create(casoData);
         res.status(201).json(nuevoCaso);
     } catch (error) {
+        console.error("Error al crear caso en backend:", error);
         res.status(400).json({ error: 'Error al registrar el expediente', detalle: error.message });
     }
 };

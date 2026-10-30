@@ -1,12 +1,26 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
+import api from '../services/api'; 
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); 
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate(); 
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Datos listos para enviar al backend:', email, password);
+    setError('');
+    
+    try {
+      const response = await api.post('/usuarios/login', { email, password });
+      localStorage.setItem('token', response.data.token);
+      navigate('/casos');
+    } catch (err) {
+      console.error('Error de login:', err);
+      setError('Credenciales incorrectas. Verificá los datos.');
+    }
   };
 
   return (
@@ -39,6 +53,13 @@ function Login() {
         }}>
           CONSULTORA INTEGRAL FORENSE
         </h2>
+
+        {error && (
+          <div style={{ color: '#ef4444', marginBottom: '15px', fontWeight: 'bold', fontSize: '14px' }}>
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ textAlign: 'left' }}>
             <label style={{ fontWeight: '600', color: '#334155', fontSize: '14px' }}>Correo Electrónico</label>
@@ -47,7 +68,7 @@ function Login() {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              placeholder="perito@consultora.com"
+              placeholder="correo@ejemplo.com"
               style={{ 
                 width: '100%', padding: '12px', marginTop: '8px', 
                 borderRadius: '6px', border: '1px solid #cbd5e1', 
@@ -74,7 +95,7 @@ function Login() {
             backgroundColor: '#0f172a', 
             color: 'white', 
             padding: '14px', 
-            marginTop: '15px',
+            marginTop: '5px',
             borderRadius: '6px', 
             border: 'none', 
             fontWeight: 'bold', 
@@ -84,6 +105,17 @@ function Login() {
           }}>
             INGRESAR AL SISTEMA
           </button>
+          
+          {/* NUEVO: ENLACE A REGISTRO */}
+          <div style={{ marginTop: '10px', fontSize: '14px', color: '#475569' }}>
+            ¿No tenés cuenta en el sistema?{' '}
+            <span 
+              onClick={() => navigate('/register')} 
+              style={{ color: '#0284c7', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+            >
+              Registrate acá
+            </span>
+          </div>
         </form>
       </div>
     </div>

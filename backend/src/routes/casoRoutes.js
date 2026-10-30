@@ -9,10 +9,10 @@ const evidenciaRoutes = require('./evidenciaRoutes');
 router.use(verificarToken);
 
 // Solo Admin o Senior pueden listar los casos
-router.get('/', adminOSenior, casoController.listarCasos);
+router.get('/', casoController.listarCasos);
 
-// SOLO el Administrador puede crear un caso nuevo
-router.post('/', soloAdmin, casoController.crearCaso);
+// Cualquier perito logueado puede crear un caso nuevo
+router.post('/', casoController.crearCaso);
 
 // Cualquier petición que termine en /evidencias se delega al enrutador de evidencias
 router.use('/:casoId/evidencias', evidenciaRoutes);
