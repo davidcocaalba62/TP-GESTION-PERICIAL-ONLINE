@@ -14,9 +14,15 @@ router.get('/', casoController.listarCasos);
 // Cualquier perito logueado puede crear un caso nuevo
 router.post('/', casoController.crearCaso);
 
+// Ruta explícita para actualizar el estado del caso
+router.put('/actualizar-estado/:id', casoController.actualizarEstadoCaso);
+
 // Cualquier petición que termine en /evidencias se delega al enrutador de evidencias
 router.use('/:casoId/evidencias', evidenciaRoutes);
 
-module.exports = router;
 // Cualquier petición que termine en /partes se delega al enrutador de partes
 router.use('/:casoId/partes', parteRoutes);
+
+// EL EXPORT SIEMPRE VA AL FINAL DE TODO
+module.exports = router;
+

@@ -42,7 +42,38 @@ const crearCaso = async (req, res) => {
     }
 };
 
+const actualizarEstadoCaso = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { estado, observaciones_cierre } = req.body;
+
+        const caso = await Caso.findByPk(id);
+        if (!caso) {
+            return res.status(404).json({ error: 'Expediente no encontrado' });
+        }
+
+        // Actualizamos los campos permitidos
+        caso.estado = estado || caso.estado;
+        if (observaciones_cierre !== undefined) {
+            caso.observaciones_cierre = observaciones_cierre;
+        }
+
+        await caso.save();
+
+        res.json({
+            mensaje: 'Expediente actualizado con éxito',
+            caso
+        });
+    } catch (error) {
+        console.error('Error al actualizar el expediente:', error);
+        res.status(500).json({ error: 'Error al actualizar el estado del caso', detalle: error.message });
+    }
+};
+
+
+
 module.exports = {
     listarCasos,
-    crearCaso
+    crearCaso,
+    actualizarEstadoCaso // <-- FALTABA AGREGAR ESTA LÍNEA ACÁ
 };

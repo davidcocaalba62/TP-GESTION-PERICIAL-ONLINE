@@ -14,6 +14,12 @@ export default function DetalleCaso() {
   const [error, setError] = useState('');
   const [exito, setExito] = useState('');
 
+  // ESTADOS PARA LA GESTIÓN DE ESTADO PROCESAL Y CIERRE
+  const [estadoActual, setEstadoActual] = useState('Recibido');
+  const [observaciones, setObservaciones] = useState('');
+  const [guardandoEstado, setGuardandoEstado] = useState(false);
+  const [exitoEstado, setExitoEstado] = useState('');
+
   // ESTADO Y LÓGICA DEL BUSCADOR (Nombre, Descripción, MD5 y SHA-256)
   const [busqueda, setBusqueda] = useState('');
   
@@ -32,15 +38,24 @@ export default function DetalleCaso() {
   });
 
   useEffect(() => {
-    cargarEvidencias();
+    cargarDatosCasoYEvidencias();
   }, [id]);
 
-  const cargarEvidencias = async () => {
+  const cargarDatosCasoYEvidencias = async () => {
     try {
-      const response = await api.get(`/casos/${id}/evidencias`);
-      setEvidencias(response.data);
+      // 1. Cargamos las evidencias del caso
+      const resEvidencias = await api.get(`/casos/${id}/evidencias`);
+      setEvidencias(resEvidencias.data);
+
+      // 2. Cargamos los detalles generales del caso para sincronizar el estado procesal
+      const resCaso = await api.get(`/casos`);
+      const casoActual = resCaso.data.find(c => c.id === parseInt(id));
+      if (casoActual) {
+        setEstadoActual(casoActual.estado || 'Recibido');
+        setObservaciones(casoActual.observaciones_cierre || '');
+      }
     } catch (err) {
-      console.error('Error al cargar evidencias:', err);
+      console.error('Error al cargar datos del caso:', err);
     }
   };
 
@@ -60,7 +75,7 @@ export default function DetalleCaso() {
     formData.append('descripcion', descripcion);
 
     try {
-      const response = await api.post(`/casos/${id}/evidencias`, formData, {
+      await api.post(`/casos/${id}/evidencias`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -68,12 +83,31 @@ export default function DetalleCaso() {
       setDescripcion('');
       setArchivo(null);
       e.target.reset();
-      cargarEvidencias();
+      cargarDatosCasoYEvidencias();
     } catch (err) {
       console.error('Error subiendo evidencia:', err);
       setError(err.response?.data?.error || 'Error al procesar el archivo.');
     } finally {
       setCargando(false);
+    }
+  };
+
+  const manejarActualizacionEstado = async () => {
+    setGuardandoEstado(true);
+    setExitoEstado('');
+    try {
+      // Apuntamos a la nueva ruta explícita
+      await api.put(`/casos/actualizar-estado/${id}`, { 
+        estado: estadoActual, 
+        observaciones_cierre: observaciones 
+      });
+      setExitoEstado('¡Estado procesal actualizado con éxito!');
+      setTimeout(() => setExitoEstado(''), 3000);
+    } catch (err) {
+      console.error('Error al actualizar estado:', err);
+      alert('Hubo un error al intentar actualizar el estado del caso.');
+    } finally {
+      setGuardandoEstado(false);
     }
   };
 
@@ -114,49 +148,100 @@ export default function DetalleCaso() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulario de Carga de Evidencia */}
-        <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl h-fit shadow-lg">
-          <h2 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
-            <UploadCloud className="w-5 h-5" /> Cargar Nueva Evidencia
-          </h2>
+        
+        {/* COLUMNA IZQUIERDA: Formulario de Carga + Gestión de Estado Procesal */}
+        <div className="space-y-6">
+          
+          {/* Formulario de Carga de Evidencia */}
+          <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg">
+            <h2 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
+              <UploadCloud className="w-5 h-5" /> Cargar Nueva Evidencia
+            </h2>
 
-          {error && <div className="mb-4 p-3 bg-rose-500/20 text-rose-300 text-sm rounded-lg">{error}</div>}
-          {exito && <div className="mb-4 p-3 bg-emerald-500/20 text-emerald-300 text-sm rounded-lg flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> {exito}</div>}
+            {error && <div className="mb-4 p-3 bg-rose-500/20 text-rose-300 text-sm rounded-lg">{error}</div>}
+            {exito && <div className="mb-4 p-3 bg-emerald-500/20 text-emerald-300 text-sm rounded-lg flex items-center gap-2"><CheckCircle2 className="w-4 h-4" /> {exito}</div>}
 
-          <form onSubmit={manejarSubida} className="space-y-4">
-            <div>
-              <label className="block text-sm text-slate-400 mb-1">Descripción de la Evidencia</label>
-              <textarea 
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                required
-                rows="3"
-                placeholder="Ej: Imagen de disco extraída durante el procedimiento..."
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-400 text-sm"
-              />
+            <form onSubmit={manejarSubida} className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Descripción de la Evidencia</label>
+                <textarea 
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  required
+                  rows="3"
+                  placeholder="Ej: Imagen de disco extraída durante el procedimiento..."
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-slate-100 focus:outline-none focus:border-cyan-400 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Archivo de Prueba</label>
+                <input 
+                  type="file"
+                  onChange={(e) => setArchivo(e.target.files[0])}
+                  required
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-300 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-slate-950 hover:file:bg-cyan-500 cursor-pointer"
+                />
+              </div>
+
+              <button 
+                type="submit"
+                disabled={cargando}
+                className="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold py-2.5 rounded-lg transition shadow-md disabled:opacity-50 flex justify-center items-center gap-2"
+              >
+                {cargando ? 'Calculando Hashes...' : 'Procesar Evidencia'}
+              </button>
+            </form>
+          </div>
+
+          {/* NUEVO PANEL: Gestión de Estado Procesal y Cierre */}
+          <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg space-y-4">
+            <h2 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5" /> Estado Procesal del Caso
+            </h2>
+
+            {exitoEstado && <div className="p-2.5 bg-emerald-500/20 text-emerald-300 text-xs rounded-lg flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> {exitoEstado}</div>}
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Estado Actual</label>
+                <select 
+                  value={estadoActual}
+                  onChange={(e) => setEstadoActual(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-100 focus:outline-none focus:border-cyan-400 text-sm"
+                >
+                  <option value="Recibido">Recibido</option>
+                  <option value="En análisis">En análisis</option>
+                  <option value="Informe redactado">Informe redactado</option>
+                  <option value="Presentado">Presentado</option>
+                  <option value="Cerrado">Cerrado</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Dictamen / Observaciones de Cierre</label>
+                <textarea 
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                  rows="3"
+                  placeholder="Detalles finales del peritaje o conclusiones..."
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 focus:outline-none focus:border-cyan-400 text-sm"
+                />
+              </div>
+
+              <button 
+                onClick={manejarActualizacionEstado}
+                disabled={guardandoEstado}
+                className="w-full bg-slate-700 hover:bg-cyan-600 text-slate-100 hover:text-slate-950 font-semibold py-2.5 rounded-lg transition text-sm border border-slate-600 shadow-md"
+              >
+                {guardandoEstado ? 'Actualizando...' : 'Actualizar Estado del Caso'}
+              </button>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm text-slate-400 mb-1">Archivo de Prueba</label>
-              <input 
-                type="file"
-                onChange={(e) => setArchivo(e.target.files[0])}
-                required
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-slate-300 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-600 file:text-slate-950 hover:file:bg-cyan-500 cursor-pointer"
-              />
-            </div>
-
-            <button 
-              type="submit"
-              disabled={cargando}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold py-2.5 rounded-lg transition shadow-md disabled:opacity-50 flex justify-center items-center gap-2"
-            >
-              {cargando ? 'Calculando Hashes...' : 'Procesar Evidencia'}
-            </button>
-          </form>
         </div>
 
-        {/* Listado de Evidencias Registradas */}
+        {/* COLUMNA DERECHA: Listado de Evidencias Registradas */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-semibold mb-4 text-slate-300">Evidencias en el Expediente #{id}</h2>
 
