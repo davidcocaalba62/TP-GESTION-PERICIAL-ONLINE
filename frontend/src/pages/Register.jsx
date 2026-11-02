@@ -114,7 +114,7 @@ function Register() {
             />
           </div>
           
-          {/* NUEVO CAMPO DE ROL */}
+          {/* CAMPO DE ROL CORREGIDO */}
           <div style={{ textAlign: 'left' }}>
             <label style={{ fontWeight: '600', color: '#334155', fontSize: '14px' }}>Rol en el Sistema</label>
             <select 
@@ -122,12 +122,12 @@ function Register() {
               onChange={(e) => setRol(e.target.value)} 
               style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', backgroundColor: 'white' }}
             >
-              <option value="Junior">Perito Junior</option>
-              <option value="Senior">Perito Senior</option>
-              <option value="Admin">Administrador</option>
+              <option value="perito_junior">Perito Junior</option>
+              <option value="perito_senior">Perito Senior</option>
+              <option value="administrador">Administrador</option>
             </select>
           </div>
-
+          
           <button type="submit" style={{ 
             backgroundColor: '#0f172a', 
             color: 'white', 
