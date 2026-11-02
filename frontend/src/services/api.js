@@ -1,20 +1,21 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL
+  baseURL: import.meta.env.VITE_API_URL || 'https://tp-gestion-pericial-online.onrender.com/api'
 });
 
-// Interceptor de peticiones: se ejecuta antes de cada request
-api.interceptors.request.use((config) => {
-  // Buscamos el token JWT guardado al iniciar sesión
-  const token = localStorage.getItem('token');
-  if (token) {
-    // Si existe, lo inyectamos automáticamente en los headers
-    config.headers.Authorization = `Bearer ${token}`;
+// INTERCEPTOR: Agrega el token automáticamente a cada petición si existe
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
+);
 
 export default api;

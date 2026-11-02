@@ -32,10 +32,10 @@ export default function Casos() {
 
     const cargarDatos = async () => {
         try {
-            const headers = { Authorization: `Bearer ${token}` };
+            // Ya no hace falta declarar { headers } a mano, el interceptor lo hace solo
             const [resCasos, resUsuarios] = await Promise.all([
-                api.get('/casos', { headers }), // Reemplazo de localhost
-                api.get('/usuarios', { headers }) // Reemplazo de localhost
+                api.get('/casos'), 
+                api.get('/usuarios') 
             ]);
             setCasos(resCasos.data);
             setUsuarios(resUsuarios.data);
@@ -54,18 +54,15 @@ export default function Casos() {
         setLoading(true);
 
         try {
-            await api.post('/casos', // Reemplazo de localhost
-                { 
-                    numero_expediente: numeroExpediente, 
-                    tipo_peritaje: tipoPeritaje, 
-                    estado, 
-                    fecha_recepcion: fechaRecepcion,
-                    fecha_vencimiento: fechaVencimiento || null,
-                    perito_senior_id: peritoSeniorId,
-                    perito_junior_id: peritoJuniorId || null
-                },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.post('/casos', { 
+                numero_expediente: numeroExpediente, 
+                tipo_peritaje: tipoPeritaje, 
+                estado, 
+                fecha_recepcion: fechaRecepcion,
+                fecha_vencimiento: fechaVencimiento || null,
+                perito_senior_id: peritoSeniorId,
+                perito_junior_id: peritoJuniorId || null
+            });
 
             setNumeroExpediente('');
             setTipoPeritaje('Informatico');
