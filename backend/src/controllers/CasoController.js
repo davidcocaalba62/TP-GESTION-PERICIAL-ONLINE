@@ -12,18 +12,10 @@ const listarCasos = async (req, res) => {
 
 const crearCaso = async (req, res) => {
     try {
-        // Imprimimos en la consola del backend para salir de dudas definitivamente
-        console.log("Payload completo del token en req.usuario:", req.usuario);
+        console.log("Payload completo recibido en crearCaso:", req.body);
 
-        // Buscamos el ID en todas las variantes posibles (id, userId, sub, usuarioId)
-        const peritoId = req.usuario?.id || req.usuario?.userId || req.usuario?.sub || req.usuario?.usuarioId;
-
-        if (!peritoId) {
-            return res.status(400).json({ 
-                error: 'Error de autenticación', 
-                detalle: 'El token de acceso no contiene un identificador de usuario válido. Por favor, volvé a iniciar sesión.' 
-            });
-        }
+        // Obtenemos el ID del usuario logueado por si acaso de respaldo
+        const peritoLogueadoId = req.usuario?.id || req.usuario?.userId || req.usuario?.sub || req.usuario?.usuarioId;
 
         const casoData = {
             numero_expediente: req.body.numero_expediente,
@@ -31,7 +23,10 @@ const crearCaso = async (req, res) => {
             estado: req.body.estado || 'Recibido',
             fecha_recepcion: req.body.fecha_recepcion || new Date().toISOString().split('T')[0],
             fecha_vencimiento: req.body.fecha_vencimiento || null,
-            perito_senior_id: peritoId // Asignación segura del ID del perito autenticado
+            // Asignamos el Senior que seleccionó en el selector, o el logueado como respaldo
+            perito_senior_id: req.body.perito_senior_id ? Number(req.body.perito_senior_id) : peritoLogueadoId,
+            // Capturamos y guardamos el Perito Junior correctamente
+            perito_junior_id: req.body.perito_junior_id ? Number(req.body.perito_junior_id) : null
         };
 
         const nuevoCaso = await Caso.create(casoData);
@@ -73,5 +68,5 @@ const actualizarEstadoCaso = async (req, res) => {
 module.exports = {
     listarCasos,
     crearCaso,
-    actualizarEstadoCaso // <-- FALTABA AGREGAR ESTA LÍNEA ACÁ
+    actualizarEstadoCaso
 };
