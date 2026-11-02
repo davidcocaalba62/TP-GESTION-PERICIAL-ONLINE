@@ -6,7 +6,7 @@ function Register() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rol, setRol] = useState('Junior'); // Nuevo estado para el rol (por defecto Junior)
+  const [rol, setRol] = useState('perito_junior'); // Nuevo estado para el rol (por defecto Junior)
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
