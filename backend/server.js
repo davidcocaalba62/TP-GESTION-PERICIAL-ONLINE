@@ -45,7 +45,7 @@ sequelize.authenticate()
   .then(() => {
     console.log('✅ Conexión a MySQL exitosa.');
     // MODO LIMPIEZA ACTIVO: force true borra y recrea las tablas
-    return sequelize.sync({ force: true }); 
+    return sequelize.sync({ alter: true }) 
   })
   .then(() => {
     app.listen(PORT, () => {
