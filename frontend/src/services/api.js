@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-// Creamos la instancia con la URL base de tu backend
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL
 });
 
 // Interceptor de peticiones: se ejecuta antes de cada request
