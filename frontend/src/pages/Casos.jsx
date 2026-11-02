@@ -226,7 +226,7 @@ export default function Casos() {
                                 <option value="">Seleccione Perito Senior...</option>
                                 {usuarios.map(u => (
                                     <option key={u.id} value={u.id}>
-                                        {u.nombre || u.usuario || `ID: ${u.id}`} ({u.rol})
+                                        {u.nombre} - Rol: ({u.rol})
                                     </option>
                                 ))}
                             </select>
@@ -242,7 +242,7 @@ export default function Casos() {
                                 <option value="">Ninguno / Sin asignar</option>
                                 {usuarios.map(u => (
                                     <option key={u.id} value={u.id}>
-                                        {u.nombre || u.usuario || `ID: ${u.id}`} ({u.rol})
+                                        {u.nombre} - Rol: ({u.rol})
                                     </option>
                                 ))}
                             </select>
