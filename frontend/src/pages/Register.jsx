@@ -1,3 +1,7 @@
+<h2 style={{ color: '#0f172a', marginBottom: '20px', fontSize: '22px', fontWeight: '800' }}>
+  ALTA DE NUEVO PERITO (PRUEBA 123)
+</h2>
+
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api'; // Importamos tu conexión centralizada a Render
