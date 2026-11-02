@@ -21,7 +21,7 @@ Evidencia.belongsTo(Caso, { foreignKey: 'caso_id' });
 Usuario.hasMany(Evidencia, { foreignKey: 'perito_id' });
 Evidencia.belongsTo(Usuario, { foreignKey: 'perito_id' });
 
-// Importamos las rutas (Estas son las líneas que faltaban)
+// Importamos las rutas
 const casoRoutes = require('./src/routes/casoRoutes');
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
 const authRoutes = require('./src/routes/authRoutes');
@@ -30,13 +30,13 @@ const app = express();
 // 1. PRIMERO: Los traductores y seguridad (Middlewares)
 app.use(helmet());
 app.use(cors());
-app.use(express.json()); // Esta línea es la que lee el JSON de Thunder Client
+app.use(express.json());
 
 // 2. SEGUNDO: Las rutas (Puertas de entrada)
 app.use('/api/casos', casoRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/casos/:casoId/evidencias', evidenciaRoutes); // <-- Agregá esta línea acá
+app.use('/api/casos/:casoId/evidencias', evidenciaRoutes);
 
 const PORT = process.env.PORT || 3000;
 
@@ -44,11 +44,12 @@ const PORT = process.env.PORT || 3000;
 sequelize.authenticate()
   .then(() => {
     console.log('✅ Conexión a MySQL exitosa.');
-    return sequelize.sync({ alter: true }); // <-- Agregamos { alter: true } acá
+    // MODO LIMPIEZA ACTIVO: force true borra y recrea las tablas
+    return sequelize.sync({ force: true }); 
   })
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor backend corriendo en http://localhost:${PORT}`);
+      console.log(`🚀 Servidor backend corriendo en el puerto ${PORT}`);
     });
   })
   .catch(err => {
