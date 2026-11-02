@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api'; // Importamos tu conexión centralizada a Render
 
 function Register() {
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rol, setRol] = useState('Junior'); // Nuevo estado para el rol (por defecto Junior)
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -16,11 +17,12 @@ function Register() {
     setMensaje('');
 
     try {
-      // Ajustá la ruta '/api/usuarios' o '/api/auth/register' según cómo hayas nombrado tu endpoint en el backend
-      const respuesta = await axios.post('http://localhost:3000/api/usuarios', {
+      // Usamos 'api.post' directo, que ya conoce la URL de Render gracias a tu variable de entorno
+      const respuesta = await api.post('/usuarios', {
         nombre,
         email,
-        password
+        password,
+        rol // Ahora enviamos el rol seleccionado al backend
       });
 
       setMensaje('¡Usuario registrado con éxito en la base de datos!');
@@ -111,6 +113,21 @@ function Register() {
               style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
             />
           </div>
+          
+          {/* NUEVO CAMPO DE ROL */}
+          <div style={{ textAlign: 'left' }}>
+            <label style={{ fontWeight: '600', color: '#334155', fontSize: '14px' }}>Rol en el Sistema</label>
+            <select 
+              value={rol} 
+              onChange={(e) => setRol(e.target.value)} 
+              style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box', backgroundColor: 'white' }}
+            >
+              <option value="Junior">Perito Junior</option>
+              <option value="Senior">Perito Senior</option>
+              <option value="Admin">Administrador</option>
+            </select>
+          </div>
+
           <button type="submit" style={{ 
             backgroundColor: '#0f172a', 
             color: 'white', 
