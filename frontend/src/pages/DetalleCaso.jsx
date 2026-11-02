@@ -23,12 +23,11 @@ export default function DetalleCaso() {
   const [guardandoEstado, setGuardandoEstado] = useState(false);
   const [exitoEstado, setExitoEstado] = useState('');
 
-  // ESTADO Y LÓGICA DEL BUSCADOR (Nombre, Descripción, MD5 y SHA-256)
+  // ESTADO Y LÓGICA DEL BUSCADOR
   const [busqueda, setBusqueda] = useState('');
   
   const evidenciasFiltradas = evidencias.filter((ev) => {
     const termino = busqueda.toLowerCase();
-    
     const md5 = (ev.hash_md5 || ev.hashes?.md5 || '').toLowerCase();
     const sha256 = (ev.hash_sha256 || ev.hashes?.sha256 || '').toLowerCase();
 
@@ -46,7 +45,6 @@ export default function DetalleCaso() {
 
   const cargarDatosCasoYEvidencias = async () => {
     try {
-      // 1. Cargamos en paralelo las evidencias, los usuarios y los casos del sistema
       const [resEvidencias, resUsuarios, resCasos] = await Promise.all([
         api.get(`/casos/${id}/evidencias`),
         api.get('/usuarios'),
@@ -139,13 +137,11 @@ export default function DetalleCaso() {
     }
   };
 
-  // Cruce de IDs para identificar al Perito Senior y Junior asignados
   const peritoSenior = usuarios.find(u => u.id === casoActual?.perito_senior_id);
   const peritoJunior = usuarios.find(u => u.id === casoActual?.perito_junior_id);
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-6">
-      {/* Botón Volver y Encabezado */}
       <div className="flex items-center justify-between mb-8 border-b border-slate-800 pb-4">
         <button 
           onClick={() => navigate('/casos')}
@@ -160,16 +156,15 @@ export default function DetalleCaso() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* COLUMNA IZQUIERDA: Formulario de Carga + Gestión de Estado Procesal + Peritos Designados */}
+        {/* COLUMNA IZQUIERDA */}
         <div className="space-y-6">
           
-          {/* NUEVO PANEL: Peritos Designados en este Expediente */}
+          {/* Panel de Peritos Designados */}
           <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg space-y-4">
             <h2 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
               <Users className="w-5 h-5" /> Peritos Designados
             </h2>
 
-            {/* Perito Senior (Responsable) */}
             <div className="bg-slate-950/70 p-3.5 rounded-lg border border-slate-800">
               <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">Perito Senior (Responsable)</span>
               {peritoSenior ? (
@@ -185,7 +180,6 @@ export default function DetalleCaso() {
               )}
             </div>
 
-            {/* Perito Junior (Opcional) */}
             <div className="bg-slate-950/70 p-3.5 rounded-lg border border-slate-800">
               <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">Perito Junior / Asistente</span>
               {peritoJunior ? (
@@ -202,7 +196,7 @@ export default function DetalleCaso() {
             </div>
           </div>
 
-          {/* Formulario de Carga de Evidencia */}
+          {/* Formulario de Carga */}
           <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg">
             <h2 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
               <UploadCloud className="w-5 h-5" /> Cargar Nueva Evidencia
@@ -244,7 +238,7 @@ export default function DetalleCaso() {
             </form>
           </div>
 
-          {/* Gestión de Estado Procesal y Cierre */}
+          {/* Estado Procesal */}
           <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg space-y-4">
             <h2 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5" /> Estado Procesal del Caso
@@ -288,16 +282,14 @@ export default function DetalleCaso() {
               </button>
             </div>
           </div>
-
         </div>
 
-        {/* COLUMNA DERECHA: Listado de Evidencias Registradas */}
+        {/* COLUMNA DERECHA: Listado de Evidencias */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="text-xl font-semibold mb-4 text-slate-300">
             Evidencias en el Expediente {casoActual ? `#${casoActual.numero_expediente}` : `#${id}`}
           </h2>
 
-          {/* ÚNICA BARRA DE BÚSQUEDA VISUAL */}
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input
@@ -309,7 +301,6 @@ export default function DetalleCaso() {
             />
           </div>
 
-          {/* MAPEO CON EVIDENCIAS FILTRADAS */}
           {evidenciasFiltradas.length === 0 ? (
             <div className="bg-slate-800/20 border border-slate-800 p-8 rounded-xl text-center text-slate-500">
               {busqueda ? 'No se encontraron evidencias con esa búsqueda.' : 'No se han registrado evidencias ni archivos guardados en este caso.'}
@@ -338,7 +329,6 @@ export default function DetalleCaso() {
                   </div>
                 </div>
 
-                {/* Bloque de Hashes Cryptográficos */}
                 <div className="bg-slate-950/70 p-3 rounded-lg border border-slate-800 font-mono text-xs space-y-1.5">
                   <div className="flex items-center gap-2 text-slate-300">
                     <Hash className="w-3.5 h-3.5 text-amber-400 shrink-0" />

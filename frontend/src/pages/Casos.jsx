@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api'; // Importación centralizada que apunta a Render
+import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { Search, Activity, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 
 export default function Casos() {
     const [casos, setCasos] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
     const [busqueda, setBusqueda] = useState('');
 
-    const casosFiltrados = casos.filter((caso) => {
-        const termino = busqueda.toLowerCase();
-        return (
-            (caso.numero_expediente && caso.numero_expediente.toLowerCase().includes(termino)) ||
-            (caso.tipo_peritaje && caso.tipo_peritaje.toLowerCase().includes(termino))
-        );
-    });
-
-    const [usuarios, setUsuarios] = useState([]);
-    
     const [numeroExpediente, setNumeroExpediente] = useState('');
     const [tipoPeritaje, setTipoPeritaje] = useState('Informatico');
     const [estado, setEstado] = useState('Recibido');
@@ -28,13 +19,10 @@ export default function Casos() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const token = localStorage.getItem('token');
 
     const cargarDatos = async () => {
         try {
-            // Probemos primero solo los usuarios para ver si responde con un 200 OK
             const resUsuarios = await api.get('/usuarios');
-            console.log("Usuarios cargados con éxito:", resUsuarios.data);
             setUsuarios(resUsuarios.data);
 
             const resCasos = await api.get('/casos');
@@ -64,7 +52,6 @@ export default function Casos() {
                 perito_junior_id: peritoJuniorId || null
             });
 
-
             setNumeroExpediente('');
             setTipoPeritaje('Informatico');
             setEstado('Recibido');
@@ -93,7 +80,14 @@ export default function Casos() {
         return 'verde';
     };
 
-    // CÁLCULO DE ESTADÍSTICAS PARA EL DASHBOARD
+    const casosFiltrados = casos.filter((caso) => {
+        const termino = busqueda.toLowerCase();
+        return (
+            (caso.numero_expediente && caso.numero_expediente.toLowerCase().includes(termino)) ||
+            (caso.tipo_peritaje && caso.tipo_peritaje.toLowerCase().includes(termino))
+        );
+    });
+
     const stats = { activos: 0, verde: 0, amarillo: 0, rojo: 0 };
     casos.forEach(caso => {
         const estadoSemaforo = obtenerEstadoSemaforo(caso.fecha_recepcion, caso.estado);
@@ -140,7 +134,6 @@ export default function Casos() {
                     </div>
                 </div>
 
-                {/* BARRA DE PROGRESO PROPORCIONAL */}
                 <div className="w-full h-3 flex rounded-full overflow-hidden bg-slate-800">
                     {stats.activos > 0 ? (
                         <>
@@ -225,8 +218,8 @@ export default function Casos() {
                                 {usuarios.map(u => (
                                     <option key={u.id} value={u.id}>
                                         {u.nombre} - Rol: ({u.rol})
-                                        </option>
-                                    ))}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -241,9 +234,8 @@ export default function Casos() {
                                 {usuarios.map(u => (
                                     <option key={u.id} value={u.id}>
                                         {u.nombre} - Rol: ({u.rol})
-                                        </option>
-                                    ))}
-
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -286,17 +278,6 @@ export default function Casos() {
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-400 transition shadow-sm"
                         />
                     </div>
-                
-                <div className="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap gap-4 text-xs text-slate-300">
-                <div>
-                    <span className="text-slate-500 font-medium">Senior:</span>{' '}
-                    <span className="text-cyan-400 font-semibold">{peritoSenior ? peritoSenior.nombre : 'No asignado'}</span>
-                    </div>
-                    <div>
-                        <span className="text-slate-500 font-medium">Junior:</span>{' '}
-                        <span className="text-emerald-400 font-semibold">{peritoJunior ? peritoJunior.nombre : 'Ninguno'}</span>
-                        </div>
-                        </div>
 
                     {casosFiltrados.length === 0 ? (
                         <div className="bg-slate-800/20 border border-slate-800 p-8 rounded-xl text-center text-slate-500">
@@ -307,7 +288,7 @@ export default function Casos() {
                             const semaforo = obtenerEstadoSemaforo(caso.fecha_recepcion, caso.estado);
                             const peritoSenior = usuarios.find(u => u.id === caso.perito_senior_id);
                             const peritoJunior = usuarios.find(u => u.id === caso.perito_junior_id);
-                            // Estilos dinámicos para las tarjetas según el semáforo
+                            
                             let borderClass = 'border-slate-800 hover:border-slate-700';
                             let bgClass = 'bg-slate-900';
                             let badgeClass = '';
@@ -348,6 +329,19 @@ export default function Casos() {
                                             )}
                                         </div>
                                         <p className="text-sm text-slate-300 mt-1 font-medium">Tipo: {caso.tipo_peritaje}</p>
+                                        
+                                        {/* Nombres de los peritos en la tarjeta principal */}
+                                        <div className="mt-2 pt-2 border-t border-slate-800 flex flex-wrap gap-4 text-xs text-slate-300">
+                                            <div>
+                                                <span className="text-slate-500">Senior:</span>{' '}
+                                                <span className="text-cyan-400 font-semibold">{peritoSenior ? peritoSenior.nombre : 'No asignado'}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">Junior:</span>{' '}
+                                                <span className="text-emerald-400 font-semibold">{peritoJunior ? peritoJunior.nombre : 'Ninguno'}</span>
+                                            </div>
+                                        </div>
+
                                         <p className="text-xs text-slate-500 mt-2">
                                             Recibido: {caso.fecha_recepcion} {caso.fecha_vencimiento ? `| Vence: ${caso.fecha_vencimiento}` : ''}
                                         </p>
