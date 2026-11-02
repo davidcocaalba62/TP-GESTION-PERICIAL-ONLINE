@@ -91,7 +91,7 @@ function Register() {
               value={nombre} 
               onChange={(e) => setNombre(e.target.value)} 
               required 
-              placeholder="Ej: Lic. David Coca Alba"
+              placeholder="Ej: Juan Perez"
               style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
             />
           </div>
@@ -102,7 +102,7 @@ function Register() {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              placeholder="perito@consultora.com"
+              placeholder="perito@gmail.com"
               style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
             />
           </div>
@@ -113,7 +113,7 @@ function Register() {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
-              placeholder="••••••••"
+              placeholder="******"
               style={{ width: '100%', padding: '10px', marginTop: '5px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
             />
           </div>
@@ -143,6 +143,7 @@ function Register() {
             fontSize: '15px',
             cursor: 'pointer'
           }}>
+            
             REGISTRAR PERITO
           </button>
         </form>
