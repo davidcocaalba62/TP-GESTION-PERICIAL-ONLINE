@@ -32,15 +32,15 @@ export default function Casos() {
 
     const cargarDatos = async () => {
         try {
-            // Ya no hace falta declarar { headers } a mano, el interceptor lo hace solo
-            const [resCasos, resUsuarios] = await Promise.all([
-                api.get('/casos'), 
-                api.get('/usuarios') 
-            ]);
-            setCasos(resCasos.data);
+            // Probemos primero solo los usuarios para ver si responde con un 200 OK
+            const resUsuarios = await api.get('/usuarios');
+            console.log("Usuarios cargados con éxito:", resUsuarios.data);
             setUsuarios(resUsuarios.data);
+
+            const resCasos = await api.get('/casos');
+            setCasos(resCasos.data);
         } catch (err) {
-            console.error('Error al cargar datos:', err);
+            console.error('Error detallado al cargar datos:', err.response || err);
         }
     };
 
