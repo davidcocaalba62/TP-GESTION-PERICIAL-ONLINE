@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { ArrowLeft, UploadCloud, FileText, Hash, ShieldCheck, CheckCircle2, Download, Search } from 'lucide-react';
+import { ArrowLeft, UploadCloud, FileText, Hash, ShieldCheck, CheckCircle2, Download, Search, Users } from 'lucide-react';
 
 export default function DetalleCaso() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [evidencias, setEvidencias] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
+  const [casoActual, setCasoActual] = useState(null);
+  
   const [descripcion, setDescripcion] = useState('');
   const [archivo, setArchivo] = useState(null);
   const [cargando, setCargando] = useState(false);
@@ -43,16 +46,21 @@ export default function DetalleCaso() {
 
   const cargarDatosCasoYEvidencias = async () => {
     try {
-      // 1. Cargamos las evidencias del caso
-      const resEvidencias = await api.get(`/casos/${id}/evidencias`);
-      setEvidencias(resEvidencias.data);
+      // 1. Cargamos en paralelo las evidencias, los usuarios y los casos del sistema
+      const [resEvidencias, resUsuarios, resCasos] = await Promise.all([
+        api.get(`/casos/${id}/evidencias`),
+        api.get('/usuarios'),
+        api.get('/casos')
+      ]);
 
-      // 2. Cargamos los detalles generales del caso para sincronizar el estado procesal
-      const resCaso = await api.get(`/casos`);
-      const casoActual = resCaso.data.find(c => c.id === parseInt(id));
-      if (casoActual) {
-        setEstadoActual(casoActual.estado || 'Recibido');
-        setObservaciones(casoActual.observaciones_cierre || '');
+      setEvidencias(resEvidencias.data);
+      setUsuarios(resUsuarios.data);
+
+      const casoEncontrado = resCasos.data.find(c => c.id === parseInt(id));
+      if (casoEncontrado) {
+        setCasoActual(casoEncontrado);
+        setEstadoActual(casoEncontrado.estado || 'Recibido');
+        setObservaciones(casoEncontrado.observaciones_cierre || '');
       }
     } catch (err) {
       console.error('Error al cargar datos del caso:', err);
@@ -96,7 +104,6 @@ export default function DetalleCaso() {
     setGuardandoEstado(true);
     setExitoEstado('');
     try {
-      // Apuntamos a la nueva ruta explícita
       await api.put(`/casos/actualizar-estado/${id}`, { 
         estado: estadoActual, 
         observaciones_cierre: observaciones 
@@ -132,6 +139,10 @@ export default function DetalleCaso() {
     }
   };
 
+  // Cruce de IDs para identificar al Perito Senior y Junior asignados
+  const peritoSenior = usuarios.find(u => u.id === casoActual?.perito_senior_id);
+  const peritoJunior = usuarios.find(u => u.id === casoActual?.perito_junior_id);
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-6">
       {/* Botón Volver y Encabezado */}
@@ -149,9 +160,48 @@ export default function DetalleCaso() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* COLUMNA IZQUIERDA: Formulario de Carga + Gestión de Estado Procesal */}
+        {/* COLUMNA IZQUIERDA: Formulario de Carga + Gestión de Estado Procesal + Peritos Designados */}
         <div className="space-y-6">
           
+          {/* NUEVO PANEL: Peritos Designados en este Expediente */}
+          <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg space-y-4">
+            <h2 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
+              <Users className="w-5 h-5" /> Peritos Designados
+            </h2>
+
+            {/* Perito Senior (Responsable) */}
+            <div className="bg-slate-950/70 p-3.5 rounded-lg border border-slate-800">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">Perito Senior (Responsable)</span>
+              {peritoSenior ? (
+                <div className="mt-1.5">
+                  <p className="font-bold text-slate-100 text-sm">{peritoSenior.nombre}</p>
+                  <p className="text-xs text-cyan-400 mt-0.5">{peritoSenior.email}</p>
+                  <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 font-medium">
+                    Rol: {peritoSenior.rol}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 mt-1 italic">Sin perito senior asignado</p>
+              )}
+            </div>
+
+            {/* Perito Junior (Opcional) */}
+            <div className="bg-slate-950/70 p-3.5 rounded-lg border border-slate-800">
+              <span className="text-xs uppercase tracking-wider text-slate-400 font-medium">Perito Junior / Asistente</span>
+              {peritoJunior ? (
+                <div className="mt-1.5">
+                  <p className="font-bold text-slate-100 text-sm">{peritoJunior.nombre}</p>
+                  <p className="text-xs text-cyan-400 mt-0.5">{peritoJunior.email}</p>
+                  <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-medium">
+                    Rol: {peritoJunior.rol}
+                  </span>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 mt-1 italic">Ninguno / Sin asignar</p>
+              )}
+            </div>
+          </div>
+
           {/* Formulario de Carga de Evidencia */}
           <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg">
             <h2 className="text-lg font-semibold text-cyan-400 mb-4 flex items-center gap-2">
@@ -187,14 +237,14 @@ export default function DetalleCaso() {
               <button 
                 type="submit"
                 disabled={cargando}
-                className="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold py-2.5 rounded-lg transition shadow-md disabled:opacity-50 flex justify-center items-center gap-2"
+                className="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-semibold py-2.5 rounded-lg transition shadow-md disabled:opacity-50 flex justify-center items-center gap-2 text-sm"
               >
                 {cargando ? 'Calculando Hashes...' : 'Procesar Evidencia'}
               </button>
             </form>
           </div>
 
-          {/* NUEVO PANEL: Gestión de Estado Procesal y Cierre */}
+          {/* Gestión de Estado Procesal y Cierre */}
           <div className="bg-slate-800/50 border border-slate-700/60 p-6 rounded-xl shadow-lg space-y-4">
             <h2 className="text-lg font-semibold text-cyan-400 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5" /> Estado Procesal del Caso
@@ -243,7 +293,9 @@ export default function DetalleCaso() {
 
         {/* COLUMNA DERECHA: Listado de Evidencias Registradas */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xl font-semibold mb-4 text-slate-300">Evidencias en el Expediente #{id}</h2>
+          <h2 className="text-xl font-semibold mb-4 text-slate-300">
+            Evidencias en el Expediente {casoActual ? `#${casoActual.numero_expediente}` : `#${id}`}
+          </h2>
 
           {/* ÚNICA BARRA DE BÚSQUEDA VISUAL */}
           <div className="relative mb-6">
