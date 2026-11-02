@@ -325,9 +325,9 @@ export default function DetalleCaso() {
                       <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded font-mono">
                         ID: #{ev.id}
                       </span>
-                      {ev.createdAt && (
+                      {ev.fecha_subida && (
                         <span className="text-xs bg-cyan-950/80 text-cyan-300 border border-cyan-800 px-2 py-1 rounded font-mono">
-                          📅 {new Date(ev.createdAt).toLocaleString()}
+                          📅 {new Date(ev.fecha_subida).toLocaleString()}
                         </span>
                       )}
                     </div>
