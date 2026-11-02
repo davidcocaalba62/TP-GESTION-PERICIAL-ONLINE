@@ -286,8 +286,8 @@ export default function Casos() {
                     ) : (
                         casosFiltrados.map((caso) => {
                             const semaforo = obtenerEstadoSemaforo(caso.fecha_recepcion, caso.estado);
-                            const peritoSenior = usuarios.find(u => u.id === caso.perito_senior_id);
-                            const peritoJunior = usuarios.find(u => u.id === caso.perito_junior_id);
+                            const peritoSenior = usuarios.find(u => Number(u.id) === Number(caso.perito_senior_id));
+                            const peritoJunior = usuarios.find(u => Number(u.id) === Number(caso.perito_junior_id));
                             
                             let borderClass = 'border-slate-800 hover:border-slate-700';
                             let bgClass = 'bg-slate-900';

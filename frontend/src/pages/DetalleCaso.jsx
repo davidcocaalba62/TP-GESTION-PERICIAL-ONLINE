@@ -137,8 +137,8 @@ export default function DetalleCaso() {
     }
   };
 
-  const peritoSenior = usuarios.find(u => u.id === casoActual?.perito_senior_id);
-  const peritoJunior = usuarios.find(u => u.id === casoActual?.perito_junior_id);
+  const peritoSenior = usuarios.find(u => Number(u.id) === Number(caso.perito_senior_id));
+  const peritoJunior = usuarios.find(u => Number(u.id) === Number(caso.perito_junior_id));
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-6">
