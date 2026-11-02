@@ -30,18 +30,21 @@ const verificarToken = (req, res, next) => {
     }
 };
 
-// Verifica que el rol sea administrador
+// Verifica que el rol sea administrador (con normalización defensiva)
 const soloAdmin = (req, res, next) => {
-    if (req.usuario?.rol !== 'administrador') {
+    const rolUsuario = req.usuario?.rol?.trim().toLowerCase();
+    if (rolUsuario !== 'administrador') {
         return res.status(403).json({ error: 'Acceso denegado: se requiere rol administrador' });
     }
     next();
 };
 
-// Verifica que el rol sea administrador o perito senior
+// Verifica que el rol sea administrador o perito senior (con normalización defensiva)
 const adminOSenior = (req, res, next) => {
+    const rolUsuario = req.usuario?.rol?.trim().toLowerCase();
     const rolesPermitidos = ['administrador', 'perito_senior'];
-    if (!rolesPermitidos.includes(req.usuario?.rol)) {
+    
+    if (!rolesPermitidos.includes(rolUsuario)) {
         return res.status(403).json({ error: 'Acceso denegado: rol insuficiente' });
     }
     next();

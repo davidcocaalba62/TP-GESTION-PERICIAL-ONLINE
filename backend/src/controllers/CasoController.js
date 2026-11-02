@@ -70,8 +70,6 @@ const actualizarEstadoCaso = async (req, res) => {
     }
 };
 
-
-
 module.exports = {
     listarCasos,
     crearCaso,
