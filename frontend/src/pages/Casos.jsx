@@ -64,6 +64,7 @@ export default function Casos() {
                 perito_junior_id: peritoJuniorId || null
             });
 
+
             setNumeroExpediente('');
             setTipoPeritaje('Informatico');
             setEstado('Recibido');
@@ -224,8 +225,8 @@ export default function Casos() {
                                 {usuarios.map(u => (
                                     <option key={u.id} value={u.id}>
                                         {u.nombre} - Rol: ({u.rol})
-                                    </option>
-                                ))}
+                                        </option>
+                                    ))}
                             </select>
                         </div>
 
@@ -240,8 +241,9 @@ export default function Casos() {
                                 {usuarios.map(u => (
                                     <option key={u.id} value={u.id}>
                                         {u.nombre} - Rol: ({u.rol})
-                                    </option>
-                                ))}
+                                        </option>
+                                    ))}
+
                             </select>
                         </div>
 
