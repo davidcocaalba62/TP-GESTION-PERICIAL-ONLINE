@@ -286,6 +286,17 @@ export default function Casos() {
                             className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-400 transition shadow-sm"
                         />
                     </div>
+                
+                <div className="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap gap-4 text-xs text-slate-300">
+                <div>
+                    <span className="text-slate-500 font-medium">Senior:</span>{' '}
+                    <span className="text-cyan-400 font-semibold">{peritoSenior ? peritoSenior.nombre : 'No asignado'}</span>
+                    </div>
+                    <div>
+                        <span className="text-slate-500 font-medium">Junior:</span>{' '}
+                        <span className="text-emerald-400 font-semibold">{peritoJunior ? peritoJunior.nombre : 'Ninguno'}</span>
+                        </div>
+                        </div>
 
                     {casosFiltrados.length === 0 ? (
                         <div className="bg-slate-800/20 border border-slate-800 p-8 rounded-xl text-center text-slate-500">
@@ -294,7 +305,8 @@ export default function Casos() {
                     ) : (
                         casosFiltrados.map((caso) => {
                             const semaforo = obtenerEstadoSemaforo(caso.fecha_recepcion, caso.estado);
-                            
+                            const peritoSenior = usuarios.find(u => u.id === caso.perito_senior_id);
+                            const peritoJunior = usuarios.find(u => u.id === caso.perito_junior_id);
                             // Estilos dinámicos para las tarjetas según el semáforo
                             let borderClass = 'border-slate-800 hover:border-slate-700';
                             let bgClass = 'bg-slate-900';
