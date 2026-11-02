@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api'; // Importación centralizada que apunta a Render
 import { useNavigate } from 'react-router-dom';
 import { Search, Activity, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
 
@@ -34,8 +34,8 @@ export default function Casos() {
         try {
             const headers = { Authorization: `Bearer ${token}` };
             const [resCasos, resUsuarios] = await Promise.all([
-                axios.get('http://localhost:3000/api/casos', { headers }),
-                axios.get('http://localhost:3000/api/usuarios', { headers })
+                api.get('/casos', { headers }), // Reemplazo de localhost
+                api.get('/usuarios', { headers }) // Reemplazo de localhost
             ]);
             setCasos(resCasos.data);
             setUsuarios(resUsuarios.data);
@@ -54,7 +54,7 @@ export default function Casos() {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:3000/api/casos', 
+            await api.post('/casos', // Reemplazo de localhost
                 { 
                     numero_expediente: numeroExpediente, 
                     tipo_peritaje: tipoPeritaje, 
