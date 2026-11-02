@@ -46,15 +46,17 @@ export default function DetalleCaso() {
   const cargarDatosCasoYEvidencias = async () => {
     try {
       const [resEvidencias, resUsuarios, resCasos] = await Promise.all([
-        api.get(`/casos/${id}/evidencias`),
-        api.get('/usuarios'),
-        api.get('/casos')
+        api.get(`/casos/${id}/evidencias`).catch(() => ({ data: [] })),
+        api.get('/usuarios').catch(() => ({ data: [] })),
+        api.get('/casos').catch(() => ({ data: [] }))
       ]);
 
-      setEvidencias(resEvidencias.data);
-      setUsuarios(resUsuarios.data);
+      setEvidencias(resEvidencias.data || []);
+      setUsuarios(resUsuarios.data || []);
 
-      const casoEncontrado = resCasos.data.find(c => c.id === parseInt(id));
+      const listaCasos = resCasos.data || [];
+      const casoEncontrado = listaCasos.find(c => Number(c.id) === Number(id));
+      
       if (casoEncontrado) {
         setCasoActual(casoEncontrado);
         setEstadoActual(casoEncontrado.estado || 'Recibido');
@@ -137,8 +139,9 @@ export default function DetalleCaso() {
     }
   };
 
-  const peritoSenior = usuarios.find(u => Number(u.id) === Number(caso.perito_senior_id));
-  const peritoJunior = usuarios.find(u => Number(u.id) === Number(caso.perito_junior_id));
+  // Cruce de IDs blindado convirtiendo ambos a Number para evitar fallos
+  const peritoSenior = usuarios.find(u => Number(u.id) === Number(casoActual?.perito_senior_id));
+  const peritoJunior = usuarios.find(u => Number(u.id) === Number(casoActual?.perito_junior_id));
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-6">
