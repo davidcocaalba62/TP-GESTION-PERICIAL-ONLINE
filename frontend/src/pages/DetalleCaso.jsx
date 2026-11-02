@@ -320,9 +320,17 @@ export default function DetalleCaso() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded font-mono">
-                      ID: #{ev.id}
-                    </span>
+                    {/* ID y Fecha/Hora de Registro */}
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded font-mono">
+                        ID: #{ev.id}
+                      </span>
+                      {ev.createdAt && (
+                        <span className="text-xs bg-cyan-950/80 text-cyan-300 border border-cyan-800 px-2 py-1 rounded font-mono">
+                          📅 {new Date(ev.createdAt).toLocaleString()}
+                        </span>
+                      )}
+                    </div>
                     <button 
                       onClick={() => manejarDescarga(ev.id, ev.nombre_archivo)}
                       className="flex items-center gap-1.5 bg-cyan-600/20 text-cyan-400 hover:bg-cyan-600 hover:text-slate-900 border border-cyan-800/50 text-xs px-3 py-1.5 rounded transition font-semibold"
